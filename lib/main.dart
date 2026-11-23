@@ -1,5 +1,6 @@
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const CineSanApp());
@@ -21,8 +22,50 @@ class CineSanApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  Map<String, dynamic>? pokemon;
+  bool cargando = false;
+  String? error;
+
+  // Función para consultar datos desde Internet
+  Future<void> consultarPokemon() async {
+    setState(() {
+      cargando = true;
+      error = null;
+      pokemon = null;
+    });
+
+    try {
+      final respuesta = await http.get(
+        Uri.parse('https://pokeapi.co/api/v2/pokemon/pikachu'),
+      );
+
+      if (respuesta.statusCode == 200) {
+        setState(() {
+          pokemon = jsonDecode(respuesta.body);
+        });
+      } else {
+        setState(() {
+          error = 'No se pudo obtener la información.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Error de conexión. Revisa tu Internet.';
+      });
+    } finally {
+      setState(() {
+        cargando = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +73,7 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'CineSan',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.deepPurple,
@@ -49,73 +90,134 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          // Capa oscura sobre la imagen
+          // Capa oscura
           Positioned.fill(
             child: Container(
-              color: Colors.black.withValues(alpha: 0.65),
+              color: Colors.black.withValues(alpha: 0.75),
             ),
           ),
 
-          // Contenido de bienvenida
+          // Contenido principal
           Center(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
-
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Icono relacionado con películas
                   const Icon(
                     Icons.movie_creation,
-                    size: 90,
+                    size: 75,
                     color: Colors.white,
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 15),
 
-                  // Mensaje de bienvenida
                   const Text(
                     '¡Bienvenido a CineSan!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 27,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 15),
 
-                  // Texto solicitado por el profesor
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 35,
-                      vertical: 15,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Text(
-                      'Hello World',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
+                  const Text(
+                    'Hello World',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 15),
 
                   const Text(
                     'Explora, disfruta y vive la magia del cine.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 17,
+                      fontSize: 16,
                       color: Colors.white,
                     ),
                   ),
+
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    'Consulta de información desde Internet',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  ElevatedButton.icon(
+                    onPressed: cargando ? null : consultarPokemon,
+                    icon: const Icon(Icons.cloud_download),
+                    label: const Text('Consultar Pokémon'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  if (cargando)
+                    const CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+
+                  if (error != null)
+                    Text(
+                      error!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                  if (pokemon != null) ...[
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          children: [
+                            Image.network(
+                              pokemon!['sprites']['front_default'],
+                              height: 120,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Text(
+                                  'No se pudo cargar la imagen',
+                                );
+                              },
+                            ),
+
+                            Text(
+                              pokemon!['name'].toString().toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Text(
+                              'Número: ${pokemon!['id']}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -125,5 +227,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
 
 
