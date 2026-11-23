@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "314121360946",
+    "project_id": "cinesan-8518a",
+    "storage_bucket": "cinesan-8518a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:314121360946:android:0880980c233c16dc12ce2b",
+        "android_client_info": {
+          "package_name": "com.example.hello_world"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlgYbBdGZXZMjUU4YtYphDsW8jHzCE22M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

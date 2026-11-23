@@ -1,8 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  print('Firebase se inicializó correctamente');
+
   runApp(const CineSanApp());
 }
 
@@ -33,6 +44,37 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? pokemon;
   bool cargando = false;
   String? error;
+
+  String? mensajeFirebase;
+  bool guardandoFirebase = false;
+
+  Future<void> registrarPelicula() async {
+    setState(() {
+      guardandoFirebase = true;
+      mensajeFirebase = null;
+    });
+
+    try {
+      await FirebaseFirestore.instance.collection('peliculas').add({
+        'nombre': 'Intensamente 2',
+        'genero': 'Animación',
+        'anio': 2024,
+        'fechaRegistro': FieldValue.serverTimestamp(),
+      });
+
+      setState(() {
+        mensajeFirebase = '¡Película guardada correctamente en Firebase!';
+      });
+    } catch (e) {
+      setState(() {
+        mensajeFirebase = 'Error al guardar la película: $e';
+      });
+    } finally {
+      setState(() {
+        guardandoFirebase = false;
+      });
+    }
+  }
 
   // Función para consultar datos desde Internet
   Future<void> consultarPokemon() async {
@@ -156,6 +198,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    'Consulta de información desde Internet',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
                   const SizedBox(height: 15),
 
                   ElevatedButton.icon(
@@ -167,6 +221,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       foregroundColor: Colors.white,
                     ),
                   ),
+
+                  const SizedBox(height: 20),
+
+                  ElevatedButton.icon(
+                    onPressed: guardandoFirebase ? null : registrarPelicula,
+                    icon: const Icon(Icons.save),
+                    label: const Text('Guardar película en Firebase'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+
+                  if (guardandoFirebase)
+                    const CircularProgressIndicator(color: Colors.white),
+
+                  if (mensajeFirebase != null)
+                    Text(
+                      mensajeFirebase!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
                   const SizedBox(height: 20),
 
