@@ -198,6 +198,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
+                  const SizedBox(height: 30),
+
+                  const Text(
+                    'Consulta de información desde Internet',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
                   const SizedBox(height: 15),
 
                   ElevatedButton.icon(
@@ -297,5 +309,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 
 
